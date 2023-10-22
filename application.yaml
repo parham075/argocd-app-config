@@ -1,4 +1,4 @@
-apiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1alpha1 # for custome resource definitions the api version is from the project itself
 kind: Application
 metadata:
   name: myapp-argo-application
@@ -7,17 +7,19 @@ spec:
   project: default
 
   source:
-    repoURL: https://gitlab.com/nanuchi/argocd-app-config.git
-    targetRevision: HEAD
-    path: dev
+    repoURL: https://gitlab.com/nanuchi/argocd-app-config.git # our git repo
+    targetRevision: HEAD # always the last commit
+    path: dev # sync a specific path in the repo
   destination: 
-    server: https://kubernetes.default.svc
-    namespace: myapp
+    server: https://kubernetes.default.svc # an internal service name of kube api server
+    # because argocd is running inside the cluster it can access internal services directy and we don't need an external cluster endpoint
+    namespace: myapp # all the config file are created in myapp namespace
 
+  # when argo cd wants to deploy myapp we want argocd automaticaly create this name space as bellow
   syncPolicy:
     syncOptions:
     - CreateNamespace=true
 
-    automated:
-      selfHeal: true
-      prune: true
+    automated: # enable automatic sync
+      selfHeal: true # automatic self-healing
+      prune: true # if we rename or delete component the whole service we want argocd delete that component or that old component in the cluster as well 
